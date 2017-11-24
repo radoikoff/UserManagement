@@ -8,6 +8,7 @@ namespace UserManagement
 {
     public static class Groups
     {
+        //Key = Level 1 groups (eP groups). Value = corresponding Level 2 groups.
         private static Dictionary<string, string> autoGroups = new Dictionary<string, string>()
         {
             {"L1 SW Engineer","L2 Software" },
@@ -18,6 +19,7 @@ namespace UserManagement
             {"L1 ttttt","L2 Systems" }
         };
 
+        //Key = Level 2 automatic group. Value = Corresponding Level 2 manual groups.
         private static Dictionary<string, string> manualGroups = new Dictionary<string, string>()
         {
             {"L2 Software","M2 Software" },

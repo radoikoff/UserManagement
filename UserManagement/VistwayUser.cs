@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace UserManagement
 {
-    public class User
+    public class VistwayUser
     {
-        public User()
+        public VistwayUser()
         {
             Groups = new HashSet<string>();
         }
 
-        public User(string account, string firstName, string lastName, string email, string country, HashSet<string> groups)
+        public VistwayUser(string account, string firstName, string lastName, string email, string country, HashSet<string> groups)
         {
             Account = account;
             FirstName = firstName;

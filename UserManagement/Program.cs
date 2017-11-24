@@ -12,24 +12,83 @@ namespace UserManagement
     {
         static void Main(string[] args)
         {
-            var vistwayUsers = ReadVistwayUsersData(@"C:\Users\vradoyko\Desktop\users.xlsx");
-            // var enterProjUsers = ReadEnterProjUsersData(@"C:\Users\vradoyko\Desktop\FTE - Oct 2017.xlsx");
+            List<VistwayUser> vistwayUsers = ReadVistwayUsersData(@"C:\Users\vradoyko\Desktop\users.xlsx");
+            List<EnterProjUser> enterProjUsers = ReadEnterProjUsersData(@"C:\Users\vradoyko\Desktop\FTE - Oct 2017.xlsx");
 
             foreach (var user in vistwayUsers)
             {
+                var enterProjUser = enterProjUsers.FirstOrDefault(u => u.Account.Equals(user.Account));
+
                 UpdateUserCountryGroup(user);
+                UpdateUserSkillGroups(user, enterProjUser);
             }
 
+            //CreateOutputFile(vistwayUsers);
         }
 
-        private static void UpdateUserCountryGroup(User user)
+        private static void UpdateUserSkillGroups(VistwayUser user, EnterProjUser enterProjUser)
         {
-            string userTrueCountryGroup = "Country:" + Groups.GetCountryNameByCountryCode(user.CountryCode);
-            List<string> userCurrentCountries = user.Groups.Where(c => c.Contains("Country:")).ToList();
+            var userAssignedLevelOneGroups = user.Groups.Where(c => c.StartsWith(GlobalValues.LEVEL_ONE_GROUP_PREFIX)).ToList();
+            var userAssignedManualGroups = user.Groups.Where(c => c.StartsWith(GlobalValues.LEVEL_TWO_MANUAL_GROUP_PREFIX)).ToList();
+
+            if (enterProjUser != null)
+            {
+                string userEnterProjSkill = enterProjUser.Skill;
+
+                switch (userAssignedLevelOneGroups.Count())
+                {
+                    case 0:
+                        user.Groups.Add(userEnterProjSkill);
+                        break;
+                    case 1:
+                        if (!userAssignedLevelOneGroups.FirstOrDefault().Equals(userEnterProjSkill))
+                        {
+                            user.Groups.Add(userEnterProjSkill);
+                        }
+                        break;
+                    default:
+                        user.Groups.RemoveWhere(g => g.StartsWith(GlobalValues.LEVEL_ONE_GROUP_PREFIX));
+                        user.Groups.Add(userEnterProjSkill);
+                        break;
+                }
+
+                if (userAssignedManualGroups.Count() != 0)
+                {
+                    user.Groups.RemoveWhere(g => g.StartsWith(GlobalValues.LEVEL_TWO_MANUAL_GROUP_PREFIX));
+                }
+            }
+            else //user has no enterProj skill
+            {
+                if (userAssignedManualGroups.Count() == 0 && userAssignedLevelOneGroups.Count() == 0)
+                {
+                    //warning "User not assigend to any group and does not have eP role" 
+                }
+
+                if (userAssignedManualGroups.Count() > 1)
+                {
+                    //warning "User is assigned to more than one Manual groups.
+                }
+
+                if (userAssignedLevelOneGroups.Count() > 1)
+                {
+                    //warning "User is assigned to more than one eP groups allthough he//she has no eP role.
+                }
+
+                if (userAssignedManualGroups.Count() == 1 && userAssignedLevelOneGroups.Count() == 1 && userAssignedManualGroups.First() != userAssignedLevelOneGroups.First())
+                {
+                    //warning "Missalignment between Manual and EP group exisit for user who has no eP skill"
+                }
+            }
+        }
+
+        private static void UpdateUserCountryGroup(VistwayUser user)
+        {
+            string userTrueCountryGroup = GlobalValues.COUNTRY_GROUP_PREFIX + Groups.GetCountryNameByCountryCode(user.CountryCode);
+            List<string> userCurrentCountries = user.Groups.Where(c => c.StartsWith(GlobalValues.COUNTRY_GROUP_PREFIX)).ToList();
 
             if (userCurrentCountries.Count() > 1)
             {
-                user.Groups.RemoveWhere(g => g.Contains("Country:"));
+                user.Groups.RemoveWhere(g => g.StartsWith(GlobalValues.COUNTRY_GROUP_PREFIX));
             }
 
             var userCurrentCountry = userCurrentCountries.FirstOrDefault();
@@ -47,9 +106,9 @@ namespace UserManagement
             }
         }
 
-        public static List<User> ReadVistwayUsersData(string fileName)
+        public static List<VistwayUser> ReadVistwayUsersData(string fileName)
         {
-            var users = new List<User>();
+            var users = new List<VistwayUser>();
 
             Excel.Application xlApp = new Excel.Application();
             Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(fileName);
@@ -73,7 +132,7 @@ namespace UserManagement
                     var groupsList = groups.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
                     var userGroups = new HashSet<string>(groupsList);
 
-                    var user = new User(account, firstName, lastName, email, countryCode, userGroups);
+                    var user = new VistwayUser(account, firstName, lastName, email, countryCode, userGroups);
                     users.Add(user);
                 }
                 else
@@ -131,7 +190,7 @@ namespace UserManagement
         }
 
 
-        
+
     }
 }
 
