@@ -20,4 +20,22 @@ namespace UserManagement
 
         public const string LEVEL_TWO_MANUAL_GROUP_PREFIX = "ManualGroup: ";
     }
+
+    public enum UsersColumn
+    {
+        Account = 2,
+        FirstName = 4,
+        LastName = 5,
+        Email = 18,
+        CountryCode = 11,
+        Groups = 20
+    }
+
+    public enum EnterProjColumn
+    {
+        Account = 2,
+        Skill = 8,
+        GroupCode = 5,
+        GroupName = 6
+    }
 }
