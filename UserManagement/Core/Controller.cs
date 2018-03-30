@@ -95,7 +95,7 @@ namespace UserManagement.Core
                 {
                     user.RemoveGroupsByPrefix(NAMUAL_GROUP_PREFIX);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserRemovedFromManualGroup, user.Id);
+                    logger.DisplayMessage(Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
                 }
             }
             else //user has no enterProj skill

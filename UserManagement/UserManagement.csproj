@@ -52,7 +52,6 @@
     <Compile Include="StaticData\Messages.cs" />
     <Compile Include="Models\Country.cs" />
     <Compile Include="Models\Group.cs" />
-    <Compile Include="Data\OutputWriter.cs" />
     <Compile Include="Models\Users\EnterProjUser.cs" />
     <Compile Include="StartUp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
