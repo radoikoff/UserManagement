@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -43,14 +44,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Messages.cs" />
-    <Compile Include="OutputWriter.cs" />
-    <Compile Include="EnterProjUser.cs" />
-    <Compile Include="GlobalValues.cs" />
-    <Compile Include="Groups.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Data\AppData.cs" />
+    <Compile Include="Data\DataMapper.cs" />
+    <Compile Include="Core\Controller.cs" />
+    <Compile Include="Data\Logger.cs" />
+    <Compile Include="StaticData\ExceptionMessages.cs" />
+    <Compile Include="StaticData\Messages.cs" />
+    <Compile Include="Models\Country.cs" />
+    <Compile Include="Models\Group.cs" />
+    <Compile Include="Data\OutputWriter.cs" />
+    <Compile Include="Models\Users\EnterProjUser.cs" />
+    <Compile Include="StartUp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VistwayUser.cs" />
+    <Compile Include="Models\Users\User.cs" />
+    <Compile Include="Models\Users\VistwayUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -84,6 +91,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
