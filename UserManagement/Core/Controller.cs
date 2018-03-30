@@ -105,7 +105,14 @@ namespace UserManagement.Core
                     logger.DisplayMessage(Messages.UserHasNoGroupAssignment, user.Id);
                 }
 
-                if (userAutoGroups.Count() > 0)
+                if (userAutoGroups.Count() == 1)
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    isUserUpdated = true;
+                    logger.DisplayMessage(Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, userAutoGroups.First());
+                }
+
+                if (userAutoGroups.Count() > 1)
                 {
                     user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                     isUserUpdated = true;

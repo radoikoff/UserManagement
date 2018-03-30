@@ -18,7 +18,7 @@ namespace UserManagement
 
         public const string UserHasNoGroupAssignment = "{0} is not assigned to any group and curently does not have eP skill";
 
-        public const string UserAssignedToMoreThanOneManualGroup = "{0} was assigned to more than one manual group";
+        public const string UserAssignedToMoreThanOneManualGroup = "ACTION: {0} was assigned to more than one manual group";
 
         public const string UserAddedToCountryGroup = "{0} is added to country group {1}";
 
@@ -32,6 +32,6 @@ namespace UserManagement
 
         public const string NewAutoUserGroupExists = "WARNING: A new auto user groups has been used. ({0})";
 
-        //public const string DuplicateUserFound = "Duplicate user found";
+        public const string UserAssignedToAnAutoGroupsWithoutBeingInEP = "{0} is member of {1} group and curently does not have eP skill";
     }
 }
