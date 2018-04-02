@@ -161,6 +161,16 @@ namespace UserManagement.Data
             return users;
         }
 
+        public static IReadOnlyCollection<string> LoadSpecialUsersFromCsv()
+        {
+            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialAssingmentFileName"));
+            var dataLines = ReadLines(sourceFilePath)
+                .Select(i => i.ToUpper().Trim())
+                .ToArray();
+
+            return dataLines;
+        }
+
         public static void SaveResultFile(List<VistwayUser> users)
         {
             if (users == null)

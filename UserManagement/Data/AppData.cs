@@ -23,6 +23,7 @@ namespace UserManagement.Data
         public List<EnterProjUser> EnterProjUsers { get; set; }
         public List<Group> Groups { get; set; }
         public List<Country> Countries { get; set; }
+        public IReadOnlyCollection<string> SpecialUsersIds { get; set; }
 
         public void SaveChages()
         {
@@ -49,6 +50,7 @@ namespace UserManagement.Data
                 this.EnterProjUsers = DataMapper.LoadEnterProjUsersFromCsv();
                 this.Groups = DataMapper.LoadGroups();
                 this.Countries = DataMapper.LoadCountries();
+                this.SpecialUsersIds = DataMapper.LoadSpecialUsersFromCsv();
                 this.IsValid = true;
             }
             catch (Exception ex)

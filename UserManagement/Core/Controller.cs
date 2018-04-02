@@ -61,6 +61,7 @@ namespace UserManagement.Core
 
             var userAutoGroups = user.Groups.Where(g => g.StartsWith(AUTO_GROUP_PREFIX)).ToList();
             var userManualGroups = user.Groups.Where(g => g.StartsWith(NAMUAL_GROUP_PREFIX)).ToList();
+            bool isUserSpecial = data.SpecialUsersIds.Contains(user.Id);
 
             if (enterProjUser != null)
             {
@@ -97,9 +98,12 @@ namespace UserManagement.Core
 
                 if (userManualGroups.Count() != 0)
                 {
-                    user.RemoveGroupsByPrefix(NAMUAL_GROUP_PREFIX);
-                    isUserUpdated = true;
-                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
+                    if (!isUserSpecial)
+                    {
+                        user.RemoveGroupsByPrefix(NAMUAL_GROUP_PREFIX);
+                        isUserUpdated = true;
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
+                    }
                 }
             }
             else //user has no enterProj skill
