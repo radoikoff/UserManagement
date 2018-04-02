@@ -36,7 +36,7 @@ namespace UserManagement.Data
             }
             catch (Exception ex)
             {
-                this.logger.DisplayMessage(ex.Message);
+                this.logger.DisplayMessage(MsgType.ERROR, ex.Message);
             }
             
         }
@@ -53,7 +53,7 @@ namespace UserManagement.Data
             }
             catch (Exception ex)
             {
-                this.logger.DisplayMessage("DB is not valid!" + Environment.NewLine + ex.Message);
+                this.logger.DisplayMessage(MsgType.ERROR, "DB is not valid!" + Environment.NewLine + ex.Message);
                 this.IsValid = false;
             }
         }

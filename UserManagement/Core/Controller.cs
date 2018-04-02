@@ -45,8 +45,12 @@ namespace UserManagement.Core
                 if (isSkillUpdated || isCountryUpdated)
                 {
                     updatedUsers.Add(vistwayUser);
-                }
+                } 
             }
+
+            this.logger.Summary.TotalUserCount = this.data.VistwayUsers.Count;
+            this.logger.Summary.UpdatedUsersCount = updatedUsers.Count;
+
             return updatedUsers;
 
         }
@@ -70,7 +74,7 @@ namespace UserManagement.Core
                     case 0:
                         user.AddGroup(userTrueAutoGroup);
                         isUserUpdated = true;
-                        logger.DisplayMessage(Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
                         break;
 
                     case 1:
@@ -79,15 +83,15 @@ namespace UserManagement.Core
                             user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                             user.AddGroup(userTrueAutoGroup);
                             isUserUpdated = true;
-                            logger.DisplayMessage(Messages.UserAutoGroupUpdated, user.Id, userTrueAutoGroup);
+                            logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userTrueAutoGroup);
                         }
                         break;
                     default:
                         user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                         user.AddGroup(userTrueAutoGroup);
                         isUserUpdated = true;
-                        logger.DisplayMessage(Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
-                        logger.DisplayMessage(Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
                         break;
                 }
 
@@ -95,33 +99,33 @@ namespace UserManagement.Core
                 {
                     user.RemoveGroupsByPrefix(NAMUAL_GROUP_PREFIX);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
                 }
             }
             else //user has no enterProj skill
             {
                 if (userManualGroups.Count() == 0 && userAutoGroups.Count() == 0)
                 {
-                    logger.DisplayMessage(Messages.UserHasNoGroupAssignment, user.Id);
+                    logger.DisplayMessage(MsgType.NOTASSIGNED, Messages.UserHasNoGroupAssignment, user.Id);
                 }
 
                 if (userAutoGroups.Count() == 1)
                 {
                     user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, userAutoGroups.First());
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, userAutoGroups.First());
                 }
 
                 if (userAutoGroups.Count() > 1)
                 {
                     user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
                 }
 
                 if (userManualGroups.Count() > 1)
                 {
-                    logger.DisplayMessage(Messages.UserAssignedToMoreThanOneManualGroup, user.Id);
+                    logger.DisplayMessage(MsgType.ACTION, Messages.UserAssignedToMoreThanOneManualGroup, user.Id);
                 }
             }
 
@@ -133,7 +137,7 @@ namespace UserManagement.Core
             bool isUserGroupExists = this.data.Groups.SelectMany(g => g.SubGroups).Contains(userTrueAutoGroup);
             if (!isUserGroupExists)
             {
-                logger.DisplayMessage(Messages.NewAutoUserGroupExists, userTrueAutoGroup);
+                logger.DisplayMessage(MsgType.WARNING, Messages.NewAutoUserGroupExists, userTrueAutoGroup);
             }
         }
 
@@ -144,7 +148,7 @@ namespace UserManagement.Core
 
             if (userCountry == null)
             {
-                logger.DisplayMessage(Messages.NotExisitingCountry, user.Id, user.CountryCode);
+                logger.DisplayMessage(MsgType.WARNING, Messages.NotExisitingCountry, user.Id, user.CountryCode);
                 return false;
             }
 
@@ -157,7 +161,7 @@ namespace UserManagement.Core
                 case 0:
                     user.AddGroup(userTrueCountryGroup);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserAddedToCountryGroup, user.Id, userTrueCountryGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToCountryGroup, user.Id, userTrueCountryGroup);
                     break;
                 case 1:
                     if (userCurrentCountries.First() != userTrueCountryGroup)
@@ -165,15 +169,15 @@ namespace UserManagement.Core
                         user.RemoveGroupsByPrefix(COUNTRY_GROUP_PREFIX);
                         user.AddGroup(userTrueCountryGroup);
                         isUserUpdated = true;
-                        logger.DisplayMessage(Messages.UserCountryGroupUpdated, user.Id, userTrueCountryGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserCountryGroupUpdated, user.Id, userTrueCountryGroup);
                     }
                     break;
                 default:
                     user.RemoveGroupsByPrefix(COUNTRY_GROUP_PREFIX);
                     user.AddGroup(userTrueCountryGroup);
                     isUserUpdated = true;
-                    logger.DisplayMessage(Messages.UserAssignedToMoreThanOneCountryGroups, user.Id);
-                    logger.DisplayMessage(Messages.UserAddedToCountryGroup, user.Id, userTrueCountryGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneCountryGroups, user.Id);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToCountryGroup, user.Id, userTrueCountryGroup);
                     break;
             }
 
@@ -184,6 +188,7 @@ namespace UserManagement.Core
         {
             var users = GetUpdatedUsers();
             data.SaveResultFile(users);
+            logger.DisplaySummaryStats();
         }
 
     }

@@ -48,6 +48,8 @@
     <Compile Include="Data\DataMapper.cs" />
     <Compile Include="Core\Controller.cs" />
     <Compile Include="Data\Logger.cs" />
+    <Compile Include="Data\MsgType.cs" />
+    <Compile Include="Data\Summary.cs" />
     <Compile Include="StaticData\ExceptionMessages.cs" />
     <Compile Include="StaticData\Messages.cs" />
     <Compile Include="Models\Country.cs" />

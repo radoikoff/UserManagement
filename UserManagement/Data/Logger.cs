@@ -11,7 +11,14 @@ namespace UserManagement.Data
 {
     class Logger
     {
-        public void DisplayException(string message)
+        public Logger()
+        {
+            this.Summary = new Summary();
+        }
+
+        public Summary Summary { get;}
+
+        private void DisplayException(string message)
         {
             ConsoleColor currentColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
@@ -19,11 +26,49 @@ namespace UserManagement.Data
             Console.ForegroundColor = currentColor;
         }
 
-        public void DisplayMessage(string message, params string[] args)
+        private void DisplayMessageOnConsole(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void DisplayMessage(MsgType msgType, string message, params string[] args)
         {
             var resultMessage = string.Format(message, args);
-            Console.WriteLine(resultMessage);
+            DisplayMessageOnConsole(resultMessage);
             WriteInLogFile(resultMessage);
+
+            UpdateSummaryStat(msgType);
+        }
+
+        public void DisplaySummaryStats()
+        {
+            DisplayMessageOnConsole(this.Summary.ToString());
+            WriteInLogFile(this.Summary.ToString());
+        }
+
+        private void UpdateSummaryStat(MsgType msgType)
+        {
+
+            switch (msgType)
+            {
+                case MsgType.INFO:
+                    this.Summary.InfoMsgCount++;
+                    break;
+                case MsgType.ACTION:
+                    this.Summary.ActionMsgCount++;
+                    break;
+                case MsgType.NOTASSIGNED:
+                    this.Summary.NotAssignedMsgCount++;
+                    break;
+                case MsgType.WARNING:
+                    this.Summary.WarningMsgCount++;
+                    break;
+                case MsgType.ERROR:
+                    this.Summary.ErrorMsgCount++;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void WriteInLogFile(string message)

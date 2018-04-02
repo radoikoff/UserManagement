@@ -16,7 +16,7 @@ namespace UserManagement
 
         public const string UserRemovedFromManualGroup = "{0} removed from a manual group {1}";
 
-        public const string UserHasNoGroupAssignment = "{0} is not assigned to any group and curently does not have eP skill";
+        public const string UserHasNoGroupAssignment = "NOTASSIGNED: {0} is not assigned to any group and curently does not have eP skill";
 
         public const string UserAssignedToMoreThanOneManualGroup = "ACTION: {0} was assigned to more than one manual group";
 
