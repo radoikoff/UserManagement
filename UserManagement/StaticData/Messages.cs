@@ -33,5 +33,7 @@ namespace UserManagement
         public const string NewAutoUserGroupExists = "WARNING: A new auto user groups has been used. ({0})";
 
         public const string UserAssignedToAnAutoGroupsWithoutBeingInEP = "{0} is member of {1} group and curently does not have eP skill";
+
+        public const string SpecialUserUpdated = "SPECIAL USER {0} removed from auto group";
     }
 }

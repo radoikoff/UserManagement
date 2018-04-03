@@ -163,9 +163,21 @@ namespace UserManagement.Data
 
         public static IReadOnlyCollection<string> LoadSpecialUsersFromCsv()
         {
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialAssingmentFileName"));
+            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialUsersFileName"));
             var dataLines = ReadLines(sourceFilePath)
+                .Skip(1)
                 .Select(i => i.ToUpper().Trim())
+                .ToArray();
+
+            return dataLines;
+        }
+
+        public static IReadOnlyCollection<string> LoadSpecialGroupsFromCsv()
+        {
+            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialGroupsFileName"));
+            var dataLines = ReadLines(sourceFilePath)
+                .Skip(1)
+                .Select(i => i.Trim())
                 .ToArray();
 
             return dataLines;

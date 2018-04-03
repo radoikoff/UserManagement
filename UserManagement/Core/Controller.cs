@@ -12,7 +12,7 @@ namespace UserManagement.Core
     class Controller
     {
         private const string AUTO_GROUP_PREFIX = "eP_";
-        private const string NAMUAL_GROUP_PREFIX = "M_";
+        private const string MANUAL_GROUP_PREFIX = "M_";
         private const string COUNTRY_GROUP_PREFIX = "Country:";
 
         Logger logger;
@@ -60,7 +60,7 @@ namespace UserManagement.Core
             bool isUserUpdated = false;
 
             var userAutoGroups = user.Groups.Where(g => g.StartsWith(AUTO_GROUP_PREFIX)).ToList();
-            var userManualGroups = user.Groups.Where(g => g.StartsWith(NAMUAL_GROUP_PREFIX)).ToList();
+            var userManualGroups = user.Groups.Where(g => g.StartsWith(MANUAL_GROUP_PREFIX)).ToList();
             bool isUserSpecial = data.SpecialUsersIds.Contains(user.Id);
 
             if (enterProjUser != null)
@@ -69,6 +69,19 @@ namespace UserManagement.Core
 
                 //check if we know the sub group
                 CheckIfUserGroupExists(userTrueAutoGroup);
+
+                //handle special user groups
+                bool hasSpecialGroup = data.SpecialGroupsNames.Intersect(userManualGroups).Any();
+                if (hasSpecialGroup)
+                {
+                    if (userAutoGroups.Any())
+                    {
+                        user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                        logger.DisplayMessage(MsgType.INFO, Messages.SpecialUserUpdated, user.Id);
+                        return true;
+                    }                   
+                    return false;
+                }
 
                 switch (userAutoGroups.Count())
                 {
@@ -100,7 +113,7 @@ namespace UserManagement.Core
                 {
                     if (!isUserSpecial)
                     {
-                        user.RemoveGroupsByPrefix(NAMUAL_GROUP_PREFIX);
+                        user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
                         isUserUpdated = true;
                         logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
                     }

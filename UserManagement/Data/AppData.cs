@@ -24,6 +24,7 @@ namespace UserManagement.Data
         public List<Group> Groups { get; set; }
         public List<Country> Countries { get; set; }
         public IReadOnlyCollection<string> SpecialUsersIds { get; set; }
+        public IReadOnlyCollection<string> SpecialGroupsNames { get; set; }
 
         public void SaveChages()
         {
@@ -51,6 +52,7 @@ namespace UserManagement.Data
                 this.Groups = DataMapper.LoadGroups();
                 this.Countries = DataMapper.LoadCountries();
                 this.SpecialUsersIds = DataMapper.LoadSpecialUsersFromCsv();
+                this.SpecialGroupsNames = DataMapper.LoadSpecialGroupsFromCsv();
                 this.IsValid = true;
             }
             catch (Exception ex)
