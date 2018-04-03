@@ -9,10 +9,13 @@ namespace UserManagement.Models.Users
     internal class VistwayUser : User
     {
         private List<string> groups;
+        private string cdsid;
+        private string countryCode;
 
-        public VistwayUser(string id, string firstName, string lastName, string accountType, string countryCode, List<string> groups, string emailAddress, bool ignoreLDAP)
+        public VistwayUser(string id, string cdsid, string firstName, string lastName, string accountType, string countryCode, List<string> groups, string emailAddress, bool ignoreLDAP)
             : base(id)
         {
+            this.CDSID = cdsid;
             this.FirstName = firstName;
             this.LastName = lastName;
             this.AccountType = accountType;
@@ -22,13 +25,25 @@ namespace UserManagement.Models.Users
             this.groups = groups;
         }
 
+        
+        public string CDSID
+        {
+            get { return cdsid; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException();
+                }
+                cdsid = value;
+            }
+        }
+        
         public string FirstName { get; private set; }
 
         public string LastName { get; private set; }
 
         public string AccountType { get; private set; }
-
-        private string countryCode;
 
         public string CountryCode
         {

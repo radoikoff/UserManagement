@@ -114,11 +114,13 @@ namespace UserManagement.Data
                 var args = line.Split('\t');
 
                 string id = args[(int)VistwayUserColumnsCsv.Id].ToUpper().Trim();
-                if (id == "GUEST")
+
+                if (users.Any(u => u.Id == id) || id == "GUEST")
                 {
                     continue;
                 }
 
+                string cdsid = args[(int)VistwayUserColumnsCsv.Id].Trim();
                 string firstName = args[(int)VistwayUserColumnsCsv.FirstName].Trim();
                 string lastName = args[(int)VistwayUserColumnsCsv.LastName].Trim();
                 string accountType = args[(int)VistwayUserColumnsCsv.AccountType].Trim();
@@ -129,7 +131,7 @@ namespace UserManagement.Data
                 string joinedGroups = args[(int)VistwayUserColumnsCsv.Groups];
                 var groups = joinedGroups.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(g => g.Trim()).ToList();
 
-                users.Add(new VistwayUser(id, firstName, lastName, accountType, countryCode, groups, emailAddress, ignoreLDAP));
+                users.Add(new VistwayUser(id, cdsid, firstName, lastName, accountType, countryCode, groups, emailAddress, ignoreLDAP));
             }
 
             return users;
@@ -198,7 +200,7 @@ namespace UserManagement.Data
             foreach (var user in users)
             {
                 string groups = string.Join(";", user.Groups);
-                string singeRowData = $"{user.LastName},{user.FirstName},{groups},{user.EmailAddress},{user.Id},,{user.AccountType},,True,";
+                string singeRowData = $"{user.LastName},{user.FirstName},{groups},{user.EmailAddress},{user.CDSID},,{user.AccountType},,True,";
                 sb.AppendLine(singeRowData);
             }
 
