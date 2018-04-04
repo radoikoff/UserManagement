@@ -115,7 +115,7 @@ namespace UserManagement.Data
 
                 string id = args[(int)VistwayUserColumnsCsv.Id].ToUpper().Trim();
 
-                if (users.Any(u => u.Id == id) || id == "GUEST")
+                if (users.Any(u => u.Id == id))
                 {
                     continue;
                 }
@@ -130,6 +130,11 @@ namespace UserManagement.Data
 
                 string joinedGroups = args[(int)VistwayUserColumnsCsv.Groups];
                 var groups = joinedGroups.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(g => g.Trim()).ToList();
+
+                if (ignoreLDAP == true)
+                {
+                    continue;
+                }
 
                 users.Add(new VistwayUser(id, cdsid, firstName, lastName, accountType, countryCode, groups, emailAddress, ignoreLDAP));
             }
