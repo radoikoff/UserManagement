@@ -123,7 +123,10 @@ namespace UserManagement.Data
                 string cdsid = args[(int)VistwayUserColumnsCsv.Id].Trim();
                 string firstName = args[(int)VistwayUserColumnsCsv.FirstName].Trim();
                 string lastName = args[(int)VistwayUserColumnsCsv.LastName].Trim();
-                string accountType = args[(int)VistwayUserColumnsCsv.AccountType].Trim();
+
+                string inputAccountType = args[(int)VistwayUserColumnsCsv.AccountType].Trim();
+                string accountType = ConvertAccountType(inputAccountType);
+
                 string countryCode = args[(int)VistwayUserColumnsCsv.CountryCode].Trim();
                 string emailAddress = args[(int)VistwayUserColumnsCsv.Email].Trim();
                 bool ignoreLDAP = args[(int)VistwayUserColumnsCsv.IgnoreLDAP].Trim() == "True";
@@ -140,6 +143,21 @@ namespace UserManagement.Data
             }
 
             return users;
+        }
+
+        private static string ConvertAccountType(string input)
+        {
+            switch (input)
+            {
+                case "Administrator":
+                    return "Admin";
+                case "Process Author":
+                    return "Author";
+                case "End User":
+                    return "End User";
+                default:
+                    return "End User";
+            }
         }
 
         public static List<EnterProjUser> LoadEnterProjUsersFromCsv()
