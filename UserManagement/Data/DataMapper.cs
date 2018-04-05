@@ -197,9 +197,9 @@ namespace UserManagement.Data
             return dataLines;
         }
 
-        public static IReadOnlyCollection<string> LoadSpecialGroupsFromCsv()
+        public static IReadOnlyCollection<string> LoadPriorityGroupsFromCsv()
         {
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialGroupsFileName"));
+            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("PriorityGroupsFileName"));
             var dataLines = ReadLines(sourceFilePath)
                 .Skip(1)
                 .Select(i => i.Trim())

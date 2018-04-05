@@ -34,6 +34,6 @@ namespace UserManagement
 
         public const string UserAssignedToAnAutoGroupsWithoutBeingInEP = "{0} is member of {1} group and curently does not have eP skill";
 
-        public const string SpecialUserUpdated = "SPECIAL USER {0} removed from auto group";
+        public const string SpecialUserUpdated = "SPECIAL USER {0} from group {1} has been removed from auto group(s) {2}";
     }
 }

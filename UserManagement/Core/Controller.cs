@@ -63,6 +63,9 @@ namespace UserManagement.Core
             var userManualGroups = user.Groups.Where(g => g.StartsWith(MANUAL_GROUP_PREFIX)).ToList();
             bool isUserSpecial = data.SpecialUsersIds.Contains(user.Id);
 
+            // remove all high-level reporting groups
+            user.RemoveGroupsByNameList(data.Groups.Select(g => g.Name));
+
             if (enterProjUser != null)
             {
                 string userTrueAutoGroup = AUTO_GROUP_PREFIX + enterProjUser.Skill;
@@ -70,14 +73,14 @@ namespace UserManagement.Core
                 //check if we know the sub group
                 CheckIfUserGroupExists(userTrueAutoGroup);
 
-                //handle special user groups
-                bool hasSpecialGroup = data.SpecialGroupsNames.Intersect(userManualGroups).Any();
-                if (hasSpecialGroup)
+                //check if the user is with priority groups
+                var userPrioriyGroups = data.PriorityGroupsNames.Intersect(userManualGroups);
+                if (userPrioriyGroups.Any())
                 {
                     if (userAutoGroups.Any())
                     {
                         user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
-                        logger.DisplayMessage(MsgType.INFO, Messages.SpecialUserUpdated, user.Id);
+                        logger.DisplayMessage(MsgType.INFO, Messages.SpecialUserUpdated, user.Id, userPrioriyGroups.First(), string.Join(", ", userAutoGroups));
                         return true;
                     }                   
                     return false;

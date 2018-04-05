@@ -25,7 +25,7 @@ namespace UserManagement.Models.Users
             this.groups = groups;
         }
 
-        
+
         public string CDSID
         {
             get { return cdsid; }
@@ -38,7 +38,7 @@ namespace UserManagement.Models.Users
                 cdsid = value;
             }
         }
-        
+
         public string FirstName { get; private set; }
 
         public string LastName { get; private set; }
@@ -100,6 +100,19 @@ namespace UserManagement.Models.Users
             }
 
             this.groups.RemoveAll(g => g.StartsWith(prefix));
+        }
+
+        public void RemoveGroupsByNameList(IEnumerable<string> groupsToRemove)
+        {
+            if (groupsToRemove == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            foreach (var groupToRemove in groupsToRemove)
+            {
+                this.groups.RemoveAll(g => g.Equals(groupToRemove));
+            }
         }
 
         public void ClearAllGroups()
