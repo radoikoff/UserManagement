@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UserManagement.Models;
+using UserManagement.Models.Groups;
 using UserManagement.Models.Users;
 
 namespace UserManagement.Data
@@ -19,16 +20,14 @@ namespace UserManagement.Data
         }
 
         public bool IsValid { get; set; }
-        public List<VistwayUser> VistwayUsers { get; set; }
-        public List<EnterProjUser> EnterProjUsers { get; set; }
-        public List<Group> Groups { get; set; }
-        public List<Country> Countries { get; set; }
-        public IReadOnlyCollection<string> SpecialUsersIds { get; set; }
-        public IReadOnlyCollection<string> PriorityGroupsNames { get; set; }
+        public List<VistwayUser> VistwayUsers { get; private set; }
+        public List<EnterProjUser> EnterProjUsers { get; private set; }
+        public List<ReportingGroup> Groups { get; private set; }
+        public List<Country> Countries { get; private set; }
+        public IEnumerable<string> ReportingGroups => this.Groups.Select(g => g.Name);
+        public IEnumerable<string> SubGroups => this.Groups.SelectMany(g => g.SubGroups).Select(sg => sg.Name);
+        public IEnumerable<string> SpecialSubGroups => this.Groups.SelectMany(g => g.SubGroups).Where(sg => sg.IsSpecial).Select(sg => sg.Name);
 
-        public void SaveChages()
-        {
-        }
 
         public void SaveResultFile(List<VistwayUser> users)
         {
@@ -38,7 +37,7 @@ namespace UserManagement.Data
             }
             catch (Exception ex)
             {
-                this.logger.DisplayMessage(MsgType.ERROR, ex.Message);
+                this.logger.DisplayMessage(MsgType.ERROR, ex.Message + Environment.NewLine + ex.InnerException.Message);
             }
             
         }
@@ -51,8 +50,6 @@ namespace UserManagement.Data
                 this.EnterProjUsers = DataMapper.LoadEnterProjUsersFromCsv();
                 this.Groups = DataMapper.LoadGroups();
                 this.Countries = DataMapper.LoadCountries();
-                this.SpecialUsersIds = DataMapper.LoadSpecialUsersFromCsv();
-                this.PriorityGroupsNames = DataMapper.LoadPriorityGroupsFromCsv();
                 this.IsValid = true;
             }
             catch (Exception ex)

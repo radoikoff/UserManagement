@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UserManagement.Models
+﻿namespace UserManagement.Models
 {
-    class Country
+    using System;
+
+    internal class Country
     {
         private string name;
         private string code;
@@ -22,11 +18,11 @@ namespace UserManagement.Models
         public string Name
         {
             get { return name; }
-            set
+            private set
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("Country name cannot be null or empty!");
                 }
                 name = value;
             }
@@ -39,7 +35,7 @@ namespace UserManagement.Models
             {
                 if (value == null || value.Length < 3)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("Country name cannot be less than 3 symbols!");
                 }
                 code = value;
             }

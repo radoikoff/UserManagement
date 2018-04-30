@@ -33,7 +33,7 @@ namespace UserManagement.Data
 
         public void DisplayMessage(MsgType msgType, string message, params string[] args)
         {
-            var resultMessage = string.Format(message, args);
+            var resultMessage = msgType.ToString() + ": " + string.Format(message, args);
             DisplayMessageOnConsole(resultMessage);
             WriteInLogFile(resultMessage);
 

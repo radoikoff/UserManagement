@@ -10,33 +10,18 @@ using UserManagement.Models.Users;
 using System.Configuration;
 using Excel = Microsoft.Office.Interop.Excel;
 using UserManagement.StaticData;
+using UserManagement.Models.Groups;
 
 namespace UserManagement.Data
 {
     class DataMapper
     {
-        //private const string DATA_PATH = @"C:\Users\vradoyko\Projects\UserManagement\UserManagement\bin\Debug\Data\";
-        //private const string CONFIG_PATH = "config.ini";
-        private const int ROWS_TO_SKIP_VISTWAY_USERS = 1;
-        private const int ROWS_TO_SKIP_EP_USERS = 7;
+        private static readonly Dictionary<string, List<string>> configData; //section name, section data lines
 
-        //private static readonly Dictionary<string, string> config; //funcition, file name
-
-        //static DataMapper()
-        //{
-        //    Directory.CreateDirectory(DATA_PATH);
-        //    config = LoadConfig(DATA_PATH + CONFIG_PATH);
-        //}
-
-        //private static Dictionary<string, string> LoadConfig(string configFilePath)
-        //{
-        //    EnsureFile(configFilePath);
-
-        //    string[] contents = ReadLines(configFilePath);
-        //    var config = contents.Select(x => x.Split('=')).ToDictionary(t => t[0], t => DATA_PATH + t[1]);
-
-        //    return config;
-        //}
+        static DataMapper()
+        {
+            configData = LoadConfig();
+        }
 
         private static string[] ReadLines(string path)
         {
@@ -44,11 +29,6 @@ namespace UserManagement.Data
             var lines = File.ReadAllLines(path);
             return lines;
         }
-
-        //private static void WriteLines(string path, string[] lines)
-        //{
-        //    File.WriteAllLines(path, lines);
-        //}
 
         private static void EnsureFile(string path)
         {
@@ -58,18 +38,57 @@ namespace UserManagement.Data
             }
         }
 
+        private static Dictionary<string, List<string>> LoadConfig()
+        {
+            var configFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("ConfigFileName"));
+            string[] configDataLines = ReadLines(configFilePath);
+
+            var data = new Dictionary<string, List<string>>();
+            string sectionName = string.Empty;
+
+            foreach (var configLine in configDataLines)
+            {
+                string line = configLine.Trim();
+
+                if (line.StartsWith(";") || line.Length == 0) //handle commented and empty lines
+                {
+                    continue;
+                }
+
+                if (line.StartsWith("[") && line.EndsWith("]")) // section
+                {
+                    sectionName = line.Trim('[', ']').ToLower();
+
+                    if (!data.ContainsKey(sectionName))
+                    {
+                        data.Add(sectionName, new List<string>());
+                    }
+
+                    continue;
+                }
+
+                if (data.ContainsKey(sectionName))
+                {
+                    data[sectionName].Add(line);
+                }
+            }
+
+            return data;
+        }
+
         public static List<Country> LoadCountries()
         {
+            const string CONFIG_SECTION_NAME = "countries";
+
             var countries = new List<Country>();
 
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("CountriesFileName"));
-            var dataLines = ReadLines(sourceFilePath);
-
-            foreach (var line in dataLines)
+            foreach (var line in configData[CONFIG_SECTION_NAME])
             {
-                var args = line.Split('=');
-                var code = args[0].Trim();
-                var name = args[1].Trim();
+
+                string[] args = line.Split('=');
+                string code = args[0].Trim();
+                string name = args[1].Trim();
+
                 if (countries.Any(c => c.Name == name) || countries.Any(c => c.Code == code))
                 {
                     throw new ArgumentException("Country already exisits");
@@ -80,13 +99,14 @@ namespace UserManagement.Data
             return countries;
         }
 
-        public static List<Group> LoadGroups()
+        public static List<ReportingGroup> LoadGroups()
         {
-            var groups = new List<Group>();
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("GroupsFileName"));
-            var dataLines = ReadLines(sourceFilePath);
+            const string GROUPS_SECTION_NAME = "groups";
+            const string SPECIAL_SECTION_NAME = "specialgroups";
 
-            foreach (var line in dataLines)
+            var groups = new List<ReportingGroup>();
+
+            foreach (var line in configData[GROUPS_SECTION_NAME])
             {
                 var args = line.Split('=');
                 var parentName = args[0].Trim();
@@ -95,16 +115,24 @@ namespace UserManagement.Data
                 var currentGroup = groups.FirstOrDefault(g => g.Name == parentName);
                 if (currentGroup == null)
                 {
-                    currentGroup = new Group(parentName);
+                    currentGroup = new ReportingGroup(parentName);
                     groups.Add(currentGroup);
                 }
-                currentGroup.AddSubGroup(childName);
+
+                bool isSubGroupSpecial = false;
+                if (configData[SPECIAL_SECTION_NAME].Contains(childName))
+                {
+                    isSubGroupSpecial = true;
+                }
+                currentGroup.AddSubGroup(new SubGroup(childName, isSubGroupSpecial));
             }
             return groups;
         }
 
         public static List<VistwayUser> LoadVistwayUsersFromCsv()
         {
+            const int ROWS_TO_SKIP_VISTWAY_USERS = 1;
+
             var users = new List<VistwayUser>();
             var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("VistwayUsersFileName"));
             var dataLines = ReadLines(sourceFilePath);
@@ -162,6 +190,8 @@ namespace UserManagement.Data
 
         public static List<EnterProjUser> LoadEnterProjUsersFromCsv()
         {
+            const int ROWS_TO_SKIP_EP_USERS = 7;
+
             var users = new List<EnterProjUser>();
             var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("EnterProjUsersFileName"));
             var dataLines = ReadLines(sourceFilePath);
@@ -184,28 +214,6 @@ namespace UserManagement.Data
             }
 
             return users;
-        }
-
-        public static IReadOnlyCollection<string> LoadSpecialUsersFromCsv()
-        {
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("SpecialUsersFileName"));
-            var dataLines = ReadLines(sourceFilePath)
-                .Skip(1)
-                .Select(i => i.ToUpper().Trim())
-                .ToArray();
-
-            return dataLines;
-        }
-
-        public static IReadOnlyCollection<string> LoadPriorityGroupsFromCsv()
-        {
-            var sourceFilePath = Path.Combine(ConfigurationManager.AppSettings.Get("DataFolderName"), ConfigurationManager.AppSettings.Get("PriorityGroupsFileName"));
-            var dataLines = ReadLines(sourceFilePath)
-                .Skip(1)
-                .Select(i => i.Trim())
-                .ToArray();
-
-            return dataLines;
         }
 
         public static void SaveResultFile(List<VistwayUser> users)

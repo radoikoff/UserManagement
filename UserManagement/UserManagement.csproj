@@ -50,10 +50,12 @@
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\MsgType.cs" />
     <Compile Include="Data\Summary.cs" />
+    <Compile Include="Models\Groups\Group.cs" />
+    <Compile Include="Models\Groups\ReportingGroup.cs" />
+    <Compile Include="Models\Groups\SubGroup.cs" />
     <Compile Include="StaticData\ExceptionMessages.cs" />
     <Compile Include="StaticData\Messages.cs" />
     <Compile Include="Models\Country.cs" />
-    <Compile Include="Models\Group.cs" />
     <Compile Include="Models\Users\EnterProjUser.cs" />
     <Compile Include="StartUp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -61,7 +63,9 @@
     <Compile Include="Models\Users\VistwayUser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">

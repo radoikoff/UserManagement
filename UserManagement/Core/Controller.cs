@@ -15,8 +15,8 @@ namespace UserManagement.Core
         private const string MANUAL_GROUP_PREFIX = "M_";
         private const string COUNTRY_GROUP_PREFIX = "Country:";
 
-        Logger logger;
-        AppData data;
+        private Logger logger;
+        private AppData data;
 
         public Controller(AppData data, Logger logger)
         {
@@ -45,7 +45,7 @@ namespace UserManagement.Core
                 if (isSkillUpdated || isCountryUpdated)
                 {
                     updatedUsers.Add(vistwayUser);
-                } 
+                }
             }
 
             this.logger.Summary.TotalUserCount = this.data.VistwayUsers.Count;
@@ -57,14 +57,23 @@ namespace UserManagement.Core
 
         private bool UpdateUserSkillGroups(VistwayUser user, EnterProjUser enterProjUser, Logger logger)
         {
-            bool isUserUpdated = false;
+            string[] userAutoGroups = user.Groups.Where(g => g.StartsWith(AUTO_GROUP_PREFIX)).ToArray();
+            string[] userManualGroups = user.Groups.Where(g => g.StartsWith(MANUAL_GROUP_PREFIX)).ToArray();
 
-            var userAutoGroups = user.Groups.Where(g => g.StartsWith(AUTO_GROUP_PREFIX)).ToList();
-            var userManualGroups = user.Groups.Where(g => g.StartsWith(MANUAL_GROUP_PREFIX)).ToList();
-            bool isUserSpecial = data.SpecialUsersIds.Contains(user.Id);
+            string[] userSpecialAutoGroups = userAutoGroups.Intersect(this.data.SpecialSubGroups.Where(gn => gn.StartsWith(AUTO_GROUP_PREFIX))).ToArray();
+            string[] userSpecialManualGroups = userManualGroups.Intersect(this.data.SpecialSubGroups.Where(gn => gn.StartsWith(MANUAL_GROUP_PREFIX))).ToArray();
+
+            if (userSpecialAutoGroups.Length > 1 || userSpecialManualGroups.Length > 1)
+            {
+                logger.DisplayMessage(MsgType.ERROR, Messages.UserHasMoreThanOneSpecialGroups, user.Id, string.Join(", ", userSpecialAutoGroups, userSpecialManualGroups));
+                return false;
+            }
+
+            string userSpecialAutoGroup = userSpecialAutoGroups.FirstOrDefault();
+            string userSpecialManualGroup = userSpecialManualGroups.FirstOrDefault();
 
             // remove all high-level reporting groups
-            user.RemoveGroupsByNameList(data.Groups.Select(g => g.Name));
+            user.RemoveGroupsByNameList(this.data.ReportingGroups);
 
             if (enterProjUser != null)
             {
@@ -73,88 +82,236 @@ namespace UserManagement.Core
                 //check if we know the sub group
                 CheckIfUserGroupExists(userTrueAutoGroup);
 
-                //check if the user is with priority groups
-                var userPrioriyGroups = data.PriorityGroupsNames.Intersect(userManualGroups);
-                if (userPrioriyGroups.Any())
+                if (userAutoGroups.Length == 0 && userManualGroups.Length == 0)  //Case 1
                 {
-                    if (userAutoGroups.Any())
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
+                    return true;
+                }
+
+                if (userAutoGroups.Length == 0 && userSpecialManualGroup == null)  //Case 2,3
+                {
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserUpdatedToAutoGroup, user.Id, userTrueAutoGroup, string.Join(", ", userManualGroups));
+                    return true;
+                }
+
+                if (userAutoGroups.Length == 0 && userManualGroups.Length > 1 && userSpecialManualGroup != null)  //Case 5
+                {
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    user.AddGroup(userSpecialManualGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserManualGroupsUpdated, user.Id, string.Join(", ", userManualGroups), userSpecialManualGroup);
+                    return true;
+                }
+
+                if (userManualGroups.Length == 0 && userAutoGroups.Length == 1 && userSpecialAutoGroup == null) //Case 6
+                {
+                    if (userTrueAutoGroup != userAutoGroups.First())
                     {
                         user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
-                        logger.DisplayMessage(MsgType.INFO, Messages.SpecialUserUpdated, user.Id, userPrioriyGroups.First(), string.Join(", ", userAutoGroups));
+                        user.AddGroup(userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userAutoGroups.First(), userTrueAutoGroup);
                         return true;
-                    }                   
+                    }
                     return false;
                 }
 
-                switch (userAutoGroups.Count())
+                if (userManualGroups.Length == 0 && userAutoGroups.Length > 1 && userSpecialAutoGroup == null) //Case 7
                 {
-                    case 0:
-                        user.AddGroup(userTrueAutoGroup);
-                        isUserUpdated = true;
-                        logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
-                        break;
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userTrueAutoGroup);
+                    return true;
+                }
 
-                    case 1:
-                        if (!userAutoGroups.First().Equals(userTrueAutoGroup))
-                        {
-                            user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
-                            user.AddGroup(userTrueAutoGroup);
-                            isUserUpdated = true;
-                            logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userTrueAutoGroup);
-                        }
-                        break;
-                    default:
+                if (userManualGroups.Length == 0 && userAutoGroups.Length == 1 && userSpecialAutoGroup != null) //Case 8
+                {
+                    bool isUpdated = false;
+                    if (userTrueAutoGroup != userAutoGroups.First())
+                    {
                         user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                         user.AddGroup(userTrueAutoGroup);
-                        isUserUpdated = true;
-                        logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
-                        logger.DisplayMessage(MsgType.INFO, Messages.UserAddedToAutoGroup, user.Id, userTrueAutoGroup);
-                        break;
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userAutoGroups.First(), userTrueAutoGroup);
+                        isUpdated = true;
+                    }
+                    logger.DisplayMessage(MsgType.ACTION, Messages.UserIsMemeberOfEpSpecialGroup, user.Id, userTrueAutoGroup);
+                    return isUpdated;
                 }
 
-                if (userManualGroups.Count() != 0)
+                if (userManualGroups.Length == 0 && userAutoGroups.Length > 1 && userSpecialAutoGroup != null) //Case 9
                 {
-                    if (!isUserSpecial)
-                    {
-                        user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
-                        isUserUpdated = true;
-                        logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroup, user.Id, string.Join(", ", userManualGroups));
-                    }
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.ACTION, Messages.UserIsMemeberOfEpSpecialGroup, user.Id, userTrueAutoGroup);
+                    return true;
                 }
+
+                if (userManualGroups.Length > 0 && userAutoGroups.Length == 1 && userSpecialAutoGroup == null && userSpecialManualGroup == null) //Case 10,11,
+                {
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroups, user.Id, string.Join(", ", userManualGroups));
+
+                    if (userTrueAutoGroup != userAutoGroups.First())
+                    {
+                        user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                        user.AddGroup(userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userAutoGroups.First(), userTrueAutoGroup);
+                    }
+                    return true;
+                }
+
+                if (userManualGroups.Length > 0 && userAutoGroups.Length > 1 && userSpecialAutoGroup == null && userSpecialManualGroup == null) //Case 12,13,
+                {
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroups, user.Id, string.Join(", ", userManualGroups));
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userTrueAutoGroup);
+                    return true;
+                }
+
+                if (userManualGroups.Length == 1 && userAutoGroups.Length == 1 && userSpecialManualGroup == null && userSpecialAutoGroup != null) //Case 14
+                {
+                    if (userTrueAutoGroup != userAutoGroups.First())
+                    {
+                        user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                        user.AddGroup(userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userAutoGroups.First(), userTrueAutoGroup);
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (userManualGroups.Length > 1 && userAutoGroups.Length == 1 && userSpecialManualGroup == null && userSpecialAutoGroup != null) //Case 15
+                {
+                    logger.DisplayMessage(MsgType.ACTION, Messages.UserForManualAssignmentHasMoreThanOneManualGroup, user.Id, string.Join(", ", userManualGroups));
+
+                    if (userTrueAutoGroup != userAutoGroups.First())
+                    {
+                        user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                        user.AddGroup(userTrueAutoGroup);
+                        logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, userAutoGroups.First(), userTrueAutoGroup);
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (userManualGroups.Length == 1 && userAutoGroups.Length > 1 && userSpecialManualGroup == null && userSpecialAutoGroup != null) //Case 16
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userTrueAutoGroup);
+                    return true;
+                }
+
+                if (userManualGroups.Length > 1 && userAutoGroups.Length > 1 && userSpecialManualGroup == null && userSpecialAutoGroup != null) //Case 17
+                {
+                    logger.DisplayMessage(MsgType.ACTION, Messages.UserForManualAssignmentHasMoreThanOneManualGroup, user.Id, string.Join(", ", userManualGroups));
+
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userTrueAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userTrueAutoGroup);
+                    return true;
+                }
+
+                if (userManualGroups.Length == 1 && userAutoGroups.Length > 0 && userSpecialManualGroup != null) //Case 18, 20
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromAutoGroups, user.Id, string.Join(", ", userAutoGroups), userSpecialManualGroup);
+                }
+
+                if (userManualGroups.Length > 1 && userAutoGroups.Length > 0 && userSpecialManualGroup != null) //Case 19, 21
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromAutoGroups, user.Id, string.Join(", ", userAutoGroups), userSpecialManualGroup);
+
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    user.AddGroup(userSpecialManualGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserManualGroupsUpdated, user.Id, string.Join(", ", userManualGroups), userSpecialManualGroup);
+                }
+
             }
             else //user has no enterProj skill
             {
                 if (userManualGroups.Count() == 0 && userAutoGroups.Count() == 0)
                 {
-                    logger.DisplayMessage(MsgType.NOTASSIGNED, Messages.UserHasNoGroupAssignment, user.Id);
+                    logger.DisplayMessage(MsgType.NOTASSIGNED, Messages.UserHasNoGroupAssignment, user.Id); //case 22
+                    return false;
                 }
 
-                if (userAutoGroups.Count() == 1)
-                {
-                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
-                    isUserUpdated = true;
-                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, userAutoGroups.First());
-                }
-
-                if (userAutoGroups.Count() > 1)
-                {
-                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
-                    isUserUpdated = true;
-                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneAutoGroups, user.Id);
-                }
-
-                if (userManualGroups.Count() > 1)
+                if (userManualGroups.Count() > 1 && userAutoGroups.Count() == 0) //Case 24
                 {
                     logger.DisplayMessage(MsgType.ACTION, Messages.UserAssignedToMoreThanOneManualGroup, user.Id);
+                    return false;
                 }
-            }
 
-            return isUserUpdated;
+                if (userManualGroups.Count() == 0 && userAutoGroups.Count() > 0 && userSpecialAutoGroup == null) //Case 25, 26
+                {
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, string.Join(", ", userAutoGroups));
+                    return false;
+                }
+
+                if (userManualGroups.Count() == 0 && userAutoGroups.Count() > 0 && userSpecialAutoGroup != null) //Case 27, 28
+                {
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToAnAutoGroupsWithoutBeingInEP, user.Id, string.Join(", ", userAutoGroups));
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToSpecialAutoGroupsWithoutBeingInManualGroup, user.Id, userSpecialAutoGroup);
+                    return false;
+                }
+
+                if (userManualGroups.Count() > 0 && userAutoGroups.Count() == 1 && userSpecialAutoGroup == null && userSpecialManualGroup == null) //Case 29, 30
+                {
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromManualGroups, user.Id, string.Join(", ", userManualGroups));
+                    return true;
+                }
+
+                if (userManualGroups.Count() > 0 && userAutoGroups.Count() > 1 && userSpecialAutoGroup == null && userSpecialManualGroup == null) //Case 31, 32
+                {
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAssignedToMoreThanOneManualOrAutoGroup, user.Id, string.Join(", ", userManualGroups, userAutoGroups));
+                    return false;
+                }
+
+                if (userManualGroups.Count() > 1 && userAutoGroups.Count() == 1 && userSpecialAutoGroup != null && userSpecialManualGroup == null) //Case 34
+                {
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserManuallyAssignedToMoreThanOneManualGroup, user.Id, string.Join(", ", userManualGroups));
+                    return false;
+                }
+
+                if (userManualGroups.Count() == 1 && userAutoGroups.Count() > 1 && userSpecialAutoGroup != null && userSpecialManualGroup == null) //Case 35
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userSpecialAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userSpecialAutoGroup);
+                    return true;
+                }
+
+                if (userManualGroups.Count() > 1 && userAutoGroups.Count() > 1 && userSpecialAutoGroup != null && userSpecialManualGroup == null) //Case 36
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.AddGroup(userSpecialAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserAutoGroupUpdated, user.Id, string.Join(", ", userAutoGroups), userSpecialAutoGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserManuallyAssignedToMoreThanOneManualGroup, user.Id, string.Join(", ", userManualGroups));
+                    return true;
+                }
+
+                if (userManualGroups.Count() > 0 && userAutoGroups.Count() > 0 && userSpecialManualGroup != null) //Case 37,38,39,40
+                {
+                    user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
+                    user.RemoveGroupsByPrefix(MANUAL_GROUP_PREFIX);
+                    user.AddGroup(userSpecialManualGroup);
+                    logger.DisplayMessage(MsgType.INFO, Messages.UserRemovedFromAllGRoupsExceptManualSpecialGroup, user.Id, userSpecialManualGroup);
+                    return true;
+                }
+
+            }
+            return false;
         }
 
         private void CheckIfUserGroupExists(string userTrueAutoGroup)
         {
-            bool isUserGroupExists = this.data.Groups.SelectMany(g => g.SubGroups).Contains(userTrueAutoGroup);
+            bool isUserGroupExists = this.data.SubGroups.Contains(userTrueAutoGroup);
             if (!isUserGroupExists)
             {
                 logger.DisplayMessage(MsgType.WARNING, Messages.NewAutoUserGroupExists, userTrueAutoGroup);
