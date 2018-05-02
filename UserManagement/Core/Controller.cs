@@ -9,7 +9,7 @@ using UserManagement.Models.Users;
 
 namespace UserManagement.Core
 {
-    class Controller
+    public class Controller
     {
         private const string AUTO_GROUP_PREFIX = "eP_";
         private const string MANUAL_GROUP_PREFIX = "M_";

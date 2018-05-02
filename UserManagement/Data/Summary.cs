@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Data
 {
-    class Summary
+    public class Summary
     {
         public int InfoMsgCount { get; set; }
 

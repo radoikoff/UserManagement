@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class Country
+    public class Country
     {
         private string name;
         private string code;

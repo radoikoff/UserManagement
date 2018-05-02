@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal abstract class Group
+    public abstract class Group
     {
         private string name;
 

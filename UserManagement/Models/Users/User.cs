@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Models.Users
 {
-    internal abstract class User
+    public abstract class User
     {
         private string id;
 

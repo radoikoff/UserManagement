@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Models.Users
 {
-    internal class VistwayUser : User
+    public class VistwayUser : User
     {
         private List<string> groups;
         private string cdsid;

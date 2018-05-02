@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Data
 {
-    class Logger
+    public class Logger
     {
         public Logger()
         {

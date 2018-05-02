@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Models.Users
 {
-    internal class EnterProjUser : User
+    public class EnterProjUser : User
     {
         public EnterProjUser(string id, string skill, string costCenterCode, string costCenterName)
             : base(id)

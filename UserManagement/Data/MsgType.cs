@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserManagement.Data
 {
-    enum MsgType
+    public enum MsgType
     {
         INFO,
         ACTION,

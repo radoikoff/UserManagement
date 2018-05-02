@@ -1,7 +1,7 @@
 ﻿namespace UserManagement.Models.Groups
 {
 
-    internal class SubGroup : Group
+    public class SubGroup : Group
     {
         public SubGroup(string name, bool isSpecial = false)
             : base(name)

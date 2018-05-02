@@ -9,7 +9,7 @@ using UserManagement.Models.Users;
 
 namespace UserManagement.Data
 {
-    class AppData
+    public class AppData
     {
         private Logger logger;
 

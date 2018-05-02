@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    internal class ReportingGroup : Group
+    public class ReportingGroup : Group
     {
         private readonly List<SubGroup> subGroups;
 
