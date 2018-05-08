@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Models.Groups;
 using UserManagement.Models.Users;
+using UserManagement.StaticData;
+using UserManagement.IO;
 
 namespace UserManagement.Data
 {
     public class AppData
     {
-        private Logger logger;
+        private ILogger logger;
 
-        public AppData(Logger logger)
+        public AppData(ILogger logger)
         {
             this.logger = logger;
             TryReadData();
@@ -24,9 +26,9 @@ namespace UserManagement.Data
         public List<EnterProjUser> EnterProjUsers { get; private set; }
         public List<ReportingGroup> Groups { get; private set; }
         public List<Country> Countries { get; private set; }
-        public IEnumerable<string> ReportingGroups => this.Groups.Select(g => g.Name);
-        public IEnumerable<string> SubGroups => this.Groups.SelectMany(g => g.SubGroups).Select(sg => sg.Name);
-        public IEnumerable<string> SpecialSubGroups => this.Groups.SelectMany(g => g.SubGroups).Where(sg => sg.IsSpecial).Select(sg => sg.Name);
+        public virtual IEnumerable<string> ReportingGroups => this.Groups.Select(g => g.Name);
+        public virtual IEnumerable<string> SubGroups => this.Groups.SelectMany(g => g.SubGroups).Select(sg => sg.Name);
+        public virtual IEnumerable<string> SpecialSubGroups => this.Groups.SelectMany(g => g.SubGroups).Where(sg => sg.IsSpecial).Select(sg => sg.Name);
 
 
         public void SaveResultFile(List<VistwayUser> users)

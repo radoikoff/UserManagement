@@ -47,9 +47,10 @@
     <Compile Include="Data\AppData.cs" />
     <Compile Include="Data\DataMapper.cs" />
     <Compile Include="Core\Controller.cs" />
-    <Compile Include="Data\Logger.cs" />
-    <Compile Include="Data\MsgType.cs" />
-    <Compile Include="Data\Summary.cs" />
+    <Compile Include="IO\ILogger.cs" />
+    <Compile Include="IO\Logger.cs" />
+    <Compile Include="IO\TestLogger.cs" />
+    <Compile Include="StaticData\MsgType.cs" />
     <Compile Include="Models\Groups\Group.cs" />
     <Compile Include="Models\Groups\ReportingGroup.cs" />
     <Compile Include="Models\Groups\SubGroup.cs" />

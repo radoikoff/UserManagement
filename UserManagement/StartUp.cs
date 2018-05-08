@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UserManagement.Core;
 using UserManagement.Data;
+using UserManagement.IO;
 
 namespace UserManagement
 {
@@ -13,7 +14,7 @@ namespace UserManagement
     {
         static void Main(string[] args)
         {
-            Logger logger = new Logger();
+            ILogger logger = new Logger();
             AppData data = new AppData(logger);
 
 

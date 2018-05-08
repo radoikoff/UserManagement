@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UserManagement.Data
+﻿namespace UserManagement.IO
 {
-    public class Logger
-    {
-        public Logger()
-        {
-            this.Summary = new Summary();
-        }
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using StaticData;
 
-        public Summary Summary { get;}
+    public class Logger : ILogger
+    {
+        private int infoMsgCount;
+        private int actionMsgCount;
+        private int warningMsgCount;
+        private int errorMsgCount;
+        private int notAssignedMsgCount;
 
         private void DisplayException(string message)
         {
@@ -42,8 +42,9 @@ namespace UserManagement.Data
 
         public void DisplaySummaryStats()
         {
-            DisplayMessageOnConsole(this.Summary.ToString());
-            WriteInLogFile(this.Summary.ToString());
+            string summary = $"SUMMARY:: ERRORS:{this.errorMsgCount} WARNINGS:{this.warningMsgCount} ACTIONS:{this.actionMsgCount} INFOS:{this.infoMsgCount} NOT ASSIGNED:{this.notAssignedMsgCount}";
+            DisplayMessageOnConsole(summary);
+            WriteInLogFile(summary);
         }
 
         private void UpdateSummaryStat(MsgType msgType)
@@ -52,19 +53,19 @@ namespace UserManagement.Data
             switch (msgType)
             {
                 case MsgType.INFO:
-                    this.Summary.InfoMsgCount++;
+                    this.infoMsgCount++;
                     break;
                 case MsgType.ACTION:
-                    this.Summary.ActionMsgCount++;
+                    this.actionMsgCount++;
                     break;
                 case MsgType.NOTASSIGNED:
-                    this.Summary.NotAssignedMsgCount++;
+                    this.notAssignedMsgCount++;
                     break;
                 case MsgType.WARNING:
-                    this.Summary.WarningMsgCount++;
+                    this.warningMsgCount++;
                     break;
                 case MsgType.ERROR:
-                    this.Summary.ErrorMsgCount++;
+                    this.errorMsgCount++;
                     break;
                 default:
                     break;
