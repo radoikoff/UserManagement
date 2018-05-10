@@ -162,9 +162,19 @@
             Assert.That(TestMessages(), Is.EquivalentTo(expectedMsgs));
         }
 
+        [Test]
+        [TestCase(new object[] { "eP_NON EXISTING", new string[] { "WARNING: New user auto group has been used. (eP_NON EXISTING)" } }, TestName = "GroupValidation_InvalidGroup")]
+        [TestCase(new object[] { "eP_AAA", new string[] { } }, TestName = "GroupValidation_ValidGroup")]
 
+        public void CheckIfUserGroupExistsTest(string userGroup, string[] expectedMsgs)
+        {
+            var controller = new Controller(this.data.Object, this.logger);
 
+            MethodInfo method = controller.GetType().GetMethod("CheckIfUserGroupExists", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.Invoke(controller, new object[] { userGroup });
 
+            Assert.That(this.TestMessages().Skip(1), Is.EquivalentTo(expectedMsgs));
+        }
 
     }
 }
