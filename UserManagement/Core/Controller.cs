@@ -87,8 +87,8 @@ namespace UserManagement.Core
 
                 user.RemoveGroupsByPrefix(AUTO_GROUP_PREFIX);
                 user.AddGroup(userTrueAutoGroup);
-
-                if (userTrueAutoGroup == userSpecialAutoGroup)
+                
+                if (data.SpecialSubGroups.Contains(userTrueAutoGroup))
                 {
                     if (userManualGroups.Length != 1)
                     {

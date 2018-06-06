@@ -55,7 +55,7 @@
         [TestCase(new object[] { new string[] { "Eng: Test", "eP_BBB", "eP_CCC" }, "AAA", new string[] { "eP_AAA" }, true, new string[] { "INFO: ID1 groups updated. Added:eP_AAA Deleted:eP_BBB, eP_CCC" } }, TestName = "Case 7a - eP_ none of them == true eP_")]
 
         [TestCase(new object[] { new string[] { "Eng: Test", "eP_SPECIAL" }, "SPECIAL", new string[] { "eP_SPECIAL" }, false, new string[] { "ACTION: ID1 is memeber of eP_SPECIAL and must be added to a single manual group. Current manual groups:None" } }, TestName = "Case 8a - one eP_SPECIAL group")]
-        [TestCase(new object[] { new string[] { "Eng: Test", "eP_AAA" }, "SPECIAL", new string[] { "eP_SPECIAL" }, true, new string[] { "INFO: ID1 groups updated. Added:eP_SPECIAL Deleted:eP_AAA" } }, TestName = "Case 8b - one eP_SPECIAL group")]
+        [TestCase(new object[] { new string[] { "Eng: Test", "eP_AAA" }, "SPECIAL", new string[] { "eP_SPECIAL" }, true, new string[] { "ACTION: ID1 is memeber of eP_SPECIAL and must be added to a single manual group. Current manual groups:None", "INFO: ID1 groups updated. Added:eP_SPECIAL Deleted:eP_AAA" } }, TestName = "Case 8b - one eP_SPECIAL group")]
         [TestCase(new object[] { new string[] { "Eng: Test", "eP_SPECIAL", "eP_AAA" }, "SPECIAL", new string[] { "eP_SPECIAL" }, true, new string[] { "ACTION: ID1 is memeber of eP_SPECIAL and must be added to a single manual group. Current manual groups:None", "INFO: ID1 groups updated. Added: Deleted:eP_AAA" } }, TestName = "Case 9 - more than one eP_ with special")]
 
         [TestCase(new object[] { new string[] { "Eng: Test", "M_Xxx", "M_Yyy", "eP_AAA", "eP_BBB", "eP_CCC" }, "BBB", new string[] { "eP_BBB" }, true, new string[] { "INFO: ID1 groups updated. Added: Deleted:M_Xxx, M_Yyy, eP_AAA, eP_CCC" } }, TestName = "Case 10-13 - M_ and eP_ together")]
@@ -71,6 +71,8 @@
         [TestCase(new object[] { new string[] { "Eng: Test", "M_SPECIAL", "M_Xxx", "eP_AAA" }, "AAA", new string[] { "M_SPECIAL", "eP_AAA" }, true, new string[] { "INFO: ID1 groups updated. Added: Deleted:M_Xxx" } }, TestName = "Case 19 - many M_SP + one P_")]
         [TestCase(new object[] { new string[] { "Eng: Test", "M_SPECIAL", "eP_AAA", "eP_BBB" }, "AAA", new string[] { "M_SPECIAL", "eP_AAA" }, true, new string[] { "INFO: ID1 groups updated. Added: Deleted:eP_BBB" } }, TestName = "Case 20 - one M_SP + many P_")]
         [TestCase(new object[] { new string[] { "Eng: Test", "M_SPECIAL", "M_Xxx", "eP_AAA", "eP_BBB" }, "AAA", new string[] { "M_SPECIAL", "eP_AAA" }, true, new string[] { "INFO: ID1 groups updated. Added: Deleted:M_Xxx, eP_BBB" } }, TestName = "Case 21 - many M_SP + many P_")]
+
+        [TestCase(new object[] { new string[] { "Eng: Test", "M_Xxx" }, "SPECIAL", new string[] { "eP_SPECIAL", "M_Xxx" }, true, new string[] { "INFO: ID1 groups updated. Added:eP_SPECIAL Deleted:" } }, TestName = "Case 22 - M_ group assigned with true eP_SPECIAL ")]
 
         public void UpdateUserSkillGroupsTest_UserHasEpSkill(string[] userGroups, string userTrueGroup, string[] resultGroups, bool IsUserUpdated, string[] expectedMsgs)
         {
